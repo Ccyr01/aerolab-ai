@@ -5,6 +5,7 @@ import json
 from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
+import threading
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal
@@ -15,6 +16,8 @@ app = FastAPI(
     description="Machine learning predictions for airfoil noise.",
     version="1.0.0",
 )
+
+training_lock = threading.Lock()
 
 app.add_middleware(
     CORSMiddleware,
@@ -245,7 +248,6 @@ def get_model_comparison():
 # --------------------------------------------------
 # Interactive Hyperparameter Lab
 # --------------------------------------------------
-
 @app.post("/experiments/train")
 def train_experiment(data: ExperimentInput):
     validate_experiment_parameters(
@@ -253,16 +255,24 @@ def train_experiment(data: ExperimentInput):
         data.parameters,
     )
 
+    if not training_lock.acquire(blocking=False):
+        raise HTTPException(
+            status_code=429,
+            detail="Another training experiment is already running. Please try again shortly.",
+        )
+
     try:
         result = run_experiment(
             algorithm=data.algorithm,
             params=data.parameters,
         )
-
         return result
 
     except (ValueError, TypeError) as error:
         raise HTTPException(
-            status_code=422,
+            status_code=400,
             detail=str(error),
-        ) from error
+        )
+
+    finally:
+        training_lock.release()
