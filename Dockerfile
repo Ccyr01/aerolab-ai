@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./backend/
 COPY data/ ./data/
+COPY demo_results/ ./results/
 COPY experiment_runner.py ./experiment_runner.py
 
 EXPOSE 8000

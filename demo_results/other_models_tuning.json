@@ -1,0 +1,53 @@
+[
+  {
+    "model": "Gradient Boosting",
+    "best_params": {
+      "n_estimators": 300,
+      "max_depth": 4,
+      "learning_rate": 0.2
+    },
+    "cv_mae": 1.2222,
+    "test_mae": 1.1618,
+    "test_rmse": 1.7011,
+    "test_r2": 0.9422,
+    "search_seconds": 1.45
+  },
+  {
+    "model": "Support Vector Regression",
+    "best_params": {
+      "model__kernel": "rbf",
+      "model__gamma": 1,
+      "model__epsilon": 0.01,
+      "model__C": 100
+    },
+    "cv_mae": 1.735,
+    "test_mae": 1.5197,
+    "test_rmse": 2.1713,
+    "test_r2": 0.9059,
+    "search_seconds": 2.9
+  },
+  {
+    "model": "Decision Tree",
+    "best_params": {
+      "min_samples_split": 2,
+      "min_samples_leaf": 2,
+      "max_depth": 30
+    },
+    "cv_mae": 2.1402,
+    "test_mae": 2.0136,
+    "test_rmse": 2.721,
+    "test_r2": 0.8522,
+    "search_seconds": 10.5
+  },
+  {
+    "model": "Ridge Regression",
+    "best_params": {
+      "model__alpha": 0.001
+    },
+    "cv_mae": 3.7914,
+    "test_mae": 3.6724,
+    "test_rmse": 4.7041,
+    "test_r2": 0.5583,
+    "search_seconds": 0.22
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "model": "Random Forest",
+    "mae": 1.3002,
+    "rmse": 1.8107,
+    "r2": 0.9346,
+    "training_seconds": 0.3157
+  },
+  {
+    "model": "Decision Tree",
+    "mae": 1.7004,
+    "rmse": 2.3119,
+    "r2": 0.8933,
+    "training_seconds": 0.0054
+  },
+  {
+    "model": "Gradient Boosting",
+    "mae": 2.1689,
+    "rmse": 2.8609,
+    "r2": 0.8366,
+    "training_seconds": 0.123
+  },
+  {
+    "model": "Support Vector Regression",
+    "mae": 2.8316,
+    "rmse": 3.7213,
+    "r2": 0.7236,
+    "training_seconds": 0.0655
+  },
+  {
+    "model": "Linear Regression",
+    "mae": 3.6724,
+    "rmse": 4.7041,
+    "r2": 0.5583,
+    "training_seconds": 0.0499
+  }
+]

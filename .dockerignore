@@ -23,8 +23,6 @@ dist/
 *.pfx
 *.p12
 
-# Generated results
-results/
 
 # Temporary files
 *.log

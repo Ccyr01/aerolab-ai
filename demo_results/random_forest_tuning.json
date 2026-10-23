@@ -1,0 +1,14 @@
+{
+  "algorithm": "Random Forest",
+  "best_params": {
+    "n_estimators": 300,
+    "min_samples_split": 2,
+    "min_samples_leaf": 1,
+    "max_depth": 30
+  },
+  "best_cv_mae": 1.4114,
+  "test_mae": 1.3027,
+  "test_rmse": 1.8076,
+  "test_r2": 0.9348,
+  "search_seconds": 12.84
+}
