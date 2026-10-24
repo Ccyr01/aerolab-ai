@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, signal, ElementRef, ViewChild, OnDestroy, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Chart from 'chart.js/auto';
@@ -55,6 +55,9 @@ interface ModelComparisonResponse {
   styleUrl: './app.scss',
 })
 export class App implements OnInit, OnDestroy {
+  private readonly apiBaseUrl = isDevMode()
+  ? 'http://127.0.0.1:8000'
+  : 'https://aerolab-api.lemonsmoke-03aa9e66.westus2.azurecontainerapps.io';
   private http = inject(HttpClient);
 
   // Interactive Hyperparameter Lab
@@ -103,7 +106,7 @@ export class App implements OnInit, OnDestroy {
       displacement_thickness: this.displacementThickness,
     };
 
-    this.http.post<PredictionResponse>('http://127.0.0.1:8000/predict', input).subscribe({
+    this.http.post<PredictionResponse>(`${this.apiBaseUrl}/predict`, input).subscribe({
       next: (response) => {
         this.prediction.set(response.predicted_sound_pressure_db);
         this.modelName.set(response.model);
@@ -180,7 +183,7 @@ export class App implements OnInit, OnDestroy {
           frequency: number;
           predicted_sound_pressure_db: number;
         }[];
-      }>('http://127.0.0.1:8000/predict/sweep', input)
+      }>(`${this.apiBaseUrl}/predict/sweep`, input)
       .subscribe({
         next: (response) => {
           this.renderFrequencyChart(response.points);
@@ -324,7 +327,7 @@ export class App implements OnInit, OnDestroy {
     }
 
     this.http
-      .post<ExperimentResult>('http://127.0.0.1:8000/experiments/train', {
+      .post<ExperimentResult>(`${this.apiBaseUrl}/experiments/train`, {
         algorithm: this.selectedAlgorithm,
         parameters,
       })
@@ -349,7 +352,7 @@ export class App implements OnInit, OnDestroy {
     this.comparisonLoading = true;
     this.comparisonError = '';
 
-    this.http.get<ModelComparisonResponse>('http://127.0.0.1:8000/models/comparison').subscribe({
+    this.http.get<ModelComparisonResponse>(`${this.apiBaseUrl}/models/comparison`).subscribe({
       next: (data) => {
         this.comparisonData = data;
         this.comparisonLoading = false;

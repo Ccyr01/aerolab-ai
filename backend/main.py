@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
 import threading
+import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal
@@ -21,7 +23,15 @@ training_lock = threading.Lock()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=[
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        *[
+            origin.strip().rstrip("/")
+            for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+            if origin.strip()
+        ],
+    ],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
