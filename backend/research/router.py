@@ -10,6 +10,57 @@ router = APIRouter(prefix="/research", tags=["Research Analytics"])
 DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "research" / "observations.csv"
 REPEATABILITY_PATH = DATA_PATH.with_name("repeatability_by_step.csv")
 SUPERVISED_PATH = DATA_PATH.with_name("supervised_summary.csv")
+ACOUSTIC_PATH = DATA_PATH.with_name("acoustic_rms.csv")
+MICROPHONES = tuple(f"Mic{i}" for i in range(3, 11))
+
+
+class AcousticPoint(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False, extra="forbid")
+    ObservationID: str = Field(min_length=1)
+    SignalIndex: int = Field(ge=0)
+    DatasetName: str = Field(min_length=1)
+    SequenceType: str = Field(min_length=1)
+    Step: int = Field(ge=0, le=20)
+    values: dict[str, float]
+
+
+@router.get("/acoustic-features", response_model=list[AcousticPoint])
+def get_acoustic_features(
+    dataset_name: str = Query(min_length=1, max_length=200, alias="DatasetName", pattern=r"^\S(?:.*\S)?$"),
+    feature: Literal["rms"] = Query(default="rms"),
+):
+    """Existing engineered RMS values for one complete run; no fitting or averaging."""
+    records = []
+    try:
+        with ACOUSTIC_PATH.open(newline="", encoding="utf-8-sig") as stream:
+            reader = csv.DictReader(stream)
+            required = {"ObservationID", "SignalIndex", "DatasetName", "SequenceType", "Step",
+                        *(f"{mic}_rms" for mic in MICROPHONES)}
+            if set(reader.fieldnames or []) != required:
+                raise ValueError("Unexpected acoustic export columns")
+            for row in reader:
+                if row["DatasetName"] != dataset_name:
+                    continue
+                point = AcousticPoint.model_validate({
+                    **{key: row[key] for key in ("ObservationID", "SignalIndex", "DatasetName", "SequenceType", "Step")},
+                    "values": {mic: row[f"{mic}_rms"] for mic in MICROPHONES},
+                })
+                if any(value < 0 for value in point.values.values()):
+                    raise ValueError("Negative RMS")
+                records.append(point)
+        if not records:
+            raise HTTPException(status_code=404, detail="Experimental run not found in acoustic export.")
+        records.sort(key=lambda point: point.Step)
+        if ([point.Step for point in records] != list(range(21))
+                or len({point.ObservationID for point in records}) != 21
+                or len({point.SignalIndex for point in records}) != 21
+                or len({point.SequenceType for point in records}) != 1):
+            raise ValueError("Incomplete or inconsistent acoustic run")
+        return records
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Acoustic feature export is not available.") from None
+    except (OSError, UnicodeError, csv.Error, ValueError, TypeError) as error:
+        raise HTTPException(status_code=500, detail="Acoustic feature export is invalid or unreadable.") from error
 
 
 class SupervisedResult(BaseModel):

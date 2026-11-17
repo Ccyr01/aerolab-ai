@@ -12,6 +12,14 @@ import { DemoPage } from './demo';
 import { Component } from '@angular/core';
 import { RepeatabilityChart } from './repeatability';
 import { FeaturePerformanceChart } from './feature-performance';
+import { RunTimeline } from './run-timeline';
+import { AcousticFeatureExplorer } from './acoustic-feature-explorer';
+import { Input } from '@angular/core';
+
+@Component({ selector: 'app-run-timeline', template: '' })
+class TimelineStub { @Input() rows: unknown[] = []; @Input() run = ''; }
+@Component({ selector: 'app-acoustic-feature-explorer', template: '' })
+class AcousticStub {}
 
 @Component({ selector: 'app-feature-performance', template: '' })
 class FeaturePerformanceStub {}
@@ -29,8 +37,8 @@ class RepeatabilityStub {}
         { provide: API_BASE_URL, useValue: 'http://test-api' }],
     });
     TestBed.overrideComponent(ResearchPage, {
-      remove: { imports: [RepeatabilityChart, FeaturePerformanceChart] },
-      add: { imports: [RepeatabilityStub, FeaturePerformanceStub] },
+      remove: { imports: [RepeatabilityChart, FeaturePerformanceChart, RunTimeline, AcousticFeatureExplorer] },
+      add: { imports: [RepeatabilityStub, FeaturePerformanceStub, TimelineStub, AcousticStub] },
     });
     http = TestBed.inject(HttpTestingController);
   });
@@ -75,14 +83,10 @@ class RepeatabilityStub {}
     http.expectOne('http://test-api/research/action-lift?limit=200&DatasetName=run_1').flush(rows);
     harness.detectChanges();
     const canvases = Array.from(harness.routeNativeElement!.querySelector('#research-analytics')!.querySelectorAll('canvas'));
-    expect(canvases.length).toBe(3);
-    for (const canvas of canvases.slice(1)) {
-      const chart = Chart.getChart(canvas)!;
-      expect(chart.data.datasets[0].data.map((point) => (point as { x: number }).x))
-        .toEqual(Array.from({ length: 21 }, (_, i) => i));
-    }
+    expect(canvases.length).toBe(1);
+    expect(harness.routeNativeElement!.querySelector('app-run-timeline')).not.toBeNull();
     const charts = Array.from(harness.routeNativeElement!.querySelectorAll('canvas')).map((canvas) => Chart.getChart(canvas)!);
-    expect(charts.length).toBe(4);
+    expect(charts.length).toBe(2);
     expect(charts[0].data.datasets[0].data).toEqual([0.242, 0.727, 0.745]);
     const destroySpies = charts.map((chart) => spyOn(chart, 'destroy').and.callThrough());
     await harness.navigateByUrl('/demo', DemoPage);

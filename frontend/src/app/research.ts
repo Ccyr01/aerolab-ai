@@ -7,6 +7,8 @@ import { API_BASE_URL } from './api-config';
 import { Subscription } from 'rxjs';
 import { RepeatabilityChart } from './repeatability';
 import { FeaturePerformanceChart } from './feature-performance';
+import { RunTimeline } from './run-timeline';
+import { AcousticFeatureExplorer } from './acoustic-feature-explorer';
 
 interface ActionLiftObservation {
   ObservationID: string;
@@ -25,7 +27,7 @@ interface ResearchRun {
 @Component({
   selector: 'app-research',
   standalone: true,
-  imports: [FormsModule, RepeatabilityChart, FeaturePerformanceChart],
+  imports: [FormsModule, RepeatabilityChart, FeaturePerformanceChart, RunTimeline, AcousticFeatureExplorer],
   templateUrl: './research.html',
   styleUrls: ['./dashboard.scss', './research-overview.scss'],
 })
@@ -44,8 +46,6 @@ export class ResearchPage implements OnInit, OnDestroy {
   private researchRequest?: Subscription;
   private researchRunsRequest?: Subscription;
   private researchChart?: Chart<'scatter'>;
-  private researchStepChart?: Chart<'line'>;
-  private researchActionChart?: Chart<'line'>;
   private reportedResultsChart?: Chart<'bar'>;
   readonly reportedResults = [
     { features: 'Forcing frequency only', r2: 0.242, mae: 0.0213, rmse: 0.0250 },
@@ -98,98 +98,6 @@ export class ResearchPage implements OnInit, OnDestroy {
           y: {
             ticks: { color: '#b5ccdc', autoSkip: false, font: { size: 12 } },
             grid: { display: false },
-          },
-        },
-      },
-    });
-  }
-
-  @ViewChild('researchActionChart')
-  set researchActionChartCanvas(ref: ElementRef<HTMLCanvasElement> | undefined) {
-    this.researchActionChart?.destroy();
-    this.researchActionChart = undefined;
-    if (!ref || !this.selectedResearchRun) return;
-
-    const observations = this.researchObservations()
-      .filter((row) => row.DatasetName === this.selectedResearchRun)
-      .sort((a, b) => a.Step - b.Step);
-    this.researchActionChart = new Chart(ref.nativeElement, {
-      type: 'line',
-      data: {
-        datasets: [{
-          label: this.selectedResearchRun,
-          data: observations.map((row) => ({ x: row.Step, y: row.CurrentAction })),
-          borderColor: '#31d7e8',
-          backgroundColor: '#31d7e8',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: '#b5ccdc' } },
-        },
-        scales: {
-          x: {
-            type: 'linear',
-            title: { display: true, text: 'Experimental Step (0–20)', color: '#8ca5b9' },
-            ticks: { color: '#8ca5b9', stepSize: 1 },
-            grid: { color: '#1b3042' },
-          },
-          y: {
-            title: { display: true, text: 'DBD Forcing Frequency (Hz)', color: '#8ca5b9' },
-            ticks: { color: '#8ca5b9' },
-            grid: { color: '#1b3042' },
-          },
-        },
-      },
-    });
-  }
-
-  @ViewChild('researchStepChart')
-  set researchStepChartCanvas(ref: ElementRef<HTMLCanvasElement> | undefined) {
-    this.researchStepChart?.destroy();
-    this.researchStepChart = undefined;
-    if (!ref || !this.selectedResearchRun) return;
-
-    const observations = this.researchObservations()
-      .filter((row) => row.DatasetName === this.selectedResearchRun)
-      .sort((a, b) => a.Step - b.Step);
-    this.researchStepChart = new Chart(ref.nativeElement, {
-      type: 'line',
-      data: {
-        datasets: [{
-          label: this.selectedResearchRun,
-          data: observations.map((row) => ({ x: row.Step, y: row.Delta_Cl })),
-          borderColor: '#31d7e8',
-          backgroundColor: '#31d7e8',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: '#b5ccdc' } },
-        },
-        scales: {
-          x: {
-            type: 'linear',
-            title: { display: true, text: 'Experimental Step (0–20)', color: '#8ca5b9' },
-            ticks: { color: '#8ca5b9', stepSize: 1 },
-            grid: { color: '#1b3042' },
-          },
-          y: {
-            title: { display: true, text: 'Change in Lift Coefficient (ΔCL, dimensionless)', color: '#8ca5b9' },
-            ticks: { color: '#8ca5b9' },
-            grid: { color: '#1b3042' },
           },
         },
       },
@@ -260,10 +168,6 @@ export class ResearchPage implements OnInit, OnDestroy {
 
   loadResearchObservations(): void {
     this.researchRequest?.unsubscribe();
-    this.researchActionChart?.destroy();
-    this.researchActionChart = undefined;
-    this.researchStepChart?.destroy();
-    this.researchStepChart = undefined;
     this.researchChart?.destroy();
     this.researchChart = undefined;
     this.researchObservations.set([]);
@@ -299,8 +203,6 @@ export class ResearchPage implements OnInit, OnDestroy {
     this.reportedResultsChart?.destroy();
     this.researchRequest?.unsubscribe();
     this.researchRunsRequest?.unsubscribe();
-    this.researchActionChart?.destroy();
-    this.researchStepChart?.destroy();
     this.researchChart?.destroy();
   }
 }

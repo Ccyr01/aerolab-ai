@@ -48,3 +48,4 @@ data/research/*
 !data/research/repeatability_by_step.csv
 !data/research/supervised_summary.csv
 !data/research/dataset_info.json
+!data/research/acoustic_rms.csv
