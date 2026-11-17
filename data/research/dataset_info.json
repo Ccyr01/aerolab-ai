@@ -1,0 +1,44 @@
+{
+  "dataset": "Sequences",
+  "observations": 3276,
+  "experimental_runs": 156,
+  "observations_per_run": 21,
+  "engineered_features": 244,
+  "signal_shape": [
+    3276,
+    8,
+    3000
+  ],
+  "samples_per_signal": 3000,
+  "microphones": [
+    "Mic3_Filtered",
+    "Mic4_Filtered",
+    "Mic5_Filtered",
+    "Mic6_Filtered",
+    "Mic7_Filtered",
+    "Mic8_Filtered",
+    "Mic9_Filtered",
+    "Mic10_Filtered"
+  ],
+  "sequence_type_counts": {
+    "descending": 76,
+    "random": 50,
+    "ascending": 30
+  },
+  "sequence_group_counts": {
+    "descending": 76,
+    "ascending": 30,
+    "random_pattern_1": 10,
+    "random_pattern_2": 10,
+    "random_pattern_3": 10,
+    "random_pattern_4": 10,
+    "random_pattern_5": 10
+  },
+  "signal_processing": {
+    "sampling_rate_Hz": 1000,
+    "duration_s": 3.0,
+    "dc_offset_removed": true,
+    "lowpass_filter_Hz": 300.0,
+    "filter_order": 4
+  }
+}

@@ -33,3 +33,18 @@ dist/
 .vscode/
 .idea/
 *.md
+
+# Local credentials, generated results, and unused research outputs
+.azure/
+.aws/
+.docker/
+Microsoft/
+results/
+data/*
+!data/airfoil_self_noise.dat
+!data/research/
+data/research/*
+!data/research/observations.csv
+!data/research/repeatability_by_step.csv
+!data/research/supervised_summary.csv
+!data/research/dataset_info.json
