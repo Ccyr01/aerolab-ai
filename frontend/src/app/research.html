@@ -1,0 +1,209 @@
+<main class="research-page">
+      <section class="experiment-overview" aria-labelledby="experiment-title">
+        <div class="overview-intro">
+          <p class="overview-eyebrow">CSCI 5415 · EXPERIMENT OVERVIEW</p>
+          <h1 id="experiment-title">Data Mining Analysis of Surface Microphone Measurements and Aerodynamic Response in DBD Plasma Flow Control.</h1>
+        </div>
+
+        <dl class="overview-stats" aria-label="Experimental dataset at a glance">
+          <div class="overview-stat">
+            <dt>Experimental runs</dt>
+            <dd>156</dd>
+            <p>30 ascending · 76 descending · 50 randomized</p>
+          </div>
+          <div class="overview-stat">
+            <dt>Total observations</dt>
+            <dd>3,276</dd>
+            <p>21 observations per experimental run</p>
+          </div>
+          <div class="overview-stat">
+            <dt>Surface microphones</dt>
+            <dd>8</dd>
+            <p>Surface measurements of the flow response</p>
+          </div>
+          <div class="overview-stat">
+            <dt>Engineered features</dt>
+            <dd>244</dd>
+            <p>Microphone features for data mining analysis</p>
+          </div>
+        </dl>
+
+        <details class="dashboard-details overview-details">
+          <summary>Research question &amp; experimental conditions</summary>
+          <p class="overview-description">Investigating the relationship between surface microphone measurements, DBD actuator forcing frequency, and aerodynamic lift through experimental data and engineered signal features.</p>
+        <div class="overview-context">
+          <div class="overview-question">
+            <h2>The research question</h2>
+            <p>Can surface microphone measurements improve our understanding and prediction of aerodynamic lift beyond knowing the DBD actuator forcing frequency alone?</p>
+          </div>
+          <div class="overview-conditions">
+            <h2>Experimental conditions</h2>
+            <p>DBD forcing frequencies span <strong>1–20 Hz</strong>, with <strong>0 Hz</strong> representing the uncontrolled baseline. Experiments were conducted at a chord-based Reynolds number of approximately <strong>50,000</strong>.</p>
+          </div>
+        </div>
+        </details>
+      </section>
+      <app-repeatability />
+      <section class="research-section reported-results" aria-labelledby="results-title">
+        <div class="lab-heading">
+          <p class="lab-eyebrow">SUBMITTED REPORT · TABLE 2</p>
+          <h2 id="results-title">Machine Learning Results</h2>
+          <p>Microphone features substantially improved prediction of lift coefficient compared with forcing frequency alone.</p>
+        </div>
+        <figure class="lab-panel">
+          <div class="reported-results-chart">
+            <canvas #reportedResultsChart role="img" aria-label="Reported R² scores: forcing frequency only 0.242; microphone features only 0.727; forcing frequency plus correlation-pruned microphone features 0.745. Full metrics are available in the reported metrics details below."></canvas>
+          </div>
+          <details class="dashboard-details metrics-details">
+            <summary>View reported metrics &amp; evaluation method</summary>
+          <p>Random Forest regression predicting lift coefficient (CL), evaluated using five-fold cross-validation grouped by experimental run.</p>
+          <div class="reported-results-table">
+            <table>
+              <caption>Table 2: reported lift coefficient prediction metrics</caption>
+              <thead>
+                <tr><th scope="col">Predictor inputs</th><th scope="col">R²</th><th scope="col">MAE</th><th scope="col">RMSE</th></tr>
+              </thead>
+              <tbody>
+                @for (result of reportedResults; track result.features) {
+                  <tr>
+                    <th scope="row">{{ result.features }}</th>
+                    <td>{{ result.r2.toFixed(3) }}</td>
+                    <td>{{ result.mae.toFixed(4) }}</td>
+                    <td>{{ result.rmse.toFixed(4) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          </details>
+          <figcaption class="lab-info">Reported results from the submitted CSCI 5415 research paper; not models trained by this dashboard.</figcaption>
+        </figure>
+      </section>
+      <app-feature-performance />
+      <section class="research-section" id="research-analytics" aria-labelledby="research-title">
+        <div class="lab-heading">
+          <p class="lab-eyebrow">AEROSPACE RESEARCH</p>
+          <h2 id="research-title">Explore Experimental Runs</h2>
+          <p>DBD actuator forcing frequency (1–20 Hz) versus change in lift coefficient from the run baseline. A forcing frequency of 0 Hz indicates the uncontrolled baseline.</p>
+        </div>
+        <div class="lab-panel" [attr.aria-busy]="researchLoading()">
+          <div class="lab-field">
+            <label for="researchRun">Experimental run</label>
+            <select id="researchRun" name="researchRun"
+              [(ngModel)]="selectedResearchRun" (ngModelChange)="loadResearchObservations()"
+              [disabled]="researchRunsLoading()">
+              <option value="">Default view (first 200 observations)</option>
+              @for (run of researchRuns(); track run.DatasetName) {
+                <option [value]="run.DatasetName">{{ run.DatasetName }} — {{ run.SequenceType }}</option>
+              }
+            </select>
+          </div>
+          @if (researchRunsLoading()) {
+            <p class="lab-info" role="status">Loading experimental runs...</p>
+          }
+          @if (researchRunsError()) {
+            <p class="lab-error" role="alert">{{ researchRunsError() }}</p>
+          }
+          <p class="lab-info">Selected run: {{ selectedResearchRun || 'Default view (multiple runs)' }}</p>
+          @if (researchLoading()) {
+            <p class="lab-info" role="status">Loading research observations...</p>
+          } @else if (researchError()) {
+            <p class="lab-error" role="alert">{{ researchError() }}</p>
+          } @else if (researchObservations().length === 0) {
+            <p class="lab-info" role="status">No research observations available.</p>
+          } @else {
+            <p class="lab-info">Showing the first {{ researchObservations().length }} observations (up to 200), in dataset order.</p>
+            <h3 class="interactive-chart-title">Forcing Frequency vs. Lift Response</h3>
+            <div class="research-chart-container">
+              <canvas #researchChart role="img" aria-label="Scatter plot of DBD forcing frequency in Hz against change in lift coefficient, ΔCL (dimensionless)"></canvas>
+            </div>
+          }
+          <div class="step-chart-grid">
+          <section class="step-chart-card" aria-labelledby="lift-step-title">
+          <div class="lab-heading">
+            <h3 id="lift-step-title">Lift Response by Experimental Step</h3>
+          </div>
+          @if (!selectedResearchRun) {
+            <p class="lab-info">Select a specific experimental run to view its lift response by step.</p>
+          } @else if (!researchLoading() && !researchError() && researchObservations().length > 0) {
+            <p class="lab-info">{{ selectedResearchRun }}: {{ researchObservations().length }} observations ordered by experimental step.</p>
+            <div class="research-chart-container">
+              <canvas #researchStepChart role="img"
+                [attr.aria-label]="'Change in lift coefficient, ΔCL (dimensionless), by experimental step (0–20) for run ' + selectedResearchRun"></canvas>
+            </div>
+          }
+          </section>
+          <section class="step-chart-card" aria-labelledby="forcing-step-title">
+          <div class="lab-heading">
+            <h3 id="forcing-step-title">Forcing Frequency by Experimental Step</h3>
+          </div>
+          @if (!selectedResearchRun) {
+            <p class="lab-info">Select a specific experimental run to view its forcing frequency by step.</p>
+          } @else if (!researchLoading() && !researchError() && researchObservations().length > 0) {
+            <p class="lab-info">{{ selectedResearchRun }}: {{ researchObservations().length }} observations ordered by experimental step.</p>
+            <div class="research-chart-container">
+              <canvas #researchActionChart role="img"
+                [attr.aria-label]="'DBD forcing frequency in Hz by experimental step (0–20) for run ' + selectedResearchRun"></canvas>
+            </div>
+          }
+          </section>
+          </div>
+        </div>
+      </section>
+      <section class="research-section feature-importance" aria-labelledby="importance-title">
+        <div class="importance-header">
+          <div class="lab-heading">
+            <p class="lab-eyebrow">REPORTED FINDINGS · FIGURE 6 &amp; SECTION IV.D</p>
+            <h2 id="importance-title">Microphone Feature Importance</h2>
+          </div>
+          <button type="button" class="importance-toggle"
+            [attr.aria-expanded]="importanceExpanded()" aria-controls="importance-details"
+            (click)="importanceExpanded.set(!importanceExpanded())">
+            {{ importanceExpanded() ? 'Hide explanation' : 'Show explanation' }}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" aria-hidden="true" [class.expanded]="importanceExpanded()">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+        <div id="importance-details" [hidden]="!importanceExpanded()">
+        <div class="lab-heading">
+          <p>Permutation importance, evaluated on held-out cross-validation data, identified informative microphone measurements for predicting lift coefficient (CL) and normalized lift improvement (R).</p>
+        </div>
+        <div class="importance-cards">
+          <article class="importance-card">
+            <p class="importance-location">MIC7 · LIFT COEFFICIENT (CL)</p>
+            <h3>Spectral features led the ranking</h3>
+            <p>Mic7 was particularly informative for predicting CL. The highest-ranked features, in reported order, were:</p>
+            <ol>
+              <li>Spectral energy in the <strong>50–150 Hz</strong> band</li>
+              <li>Spectral energy in the <strong>150–300 Hz</strong> band</li>
+              <li>Spectral centroid</li>
+            </ol>
+          </article>
+          <article class="importance-card">
+            <p class="importance-location">MIC7 · ADDITIONAL INFORMATIVE FEATURES</p>
+            <h3>Signal amplitude and shape</h3>
+            <p>These Mic7 measurements also helped predict lift coefficient:</p>
+            <ul>
+              <li><strong>Peak-to-peak amplitude:</strong> the signal's overall amplitude range</li>
+              <li><strong>RMS:</strong> a measure of signal magnitude</li>
+              <li><strong>Kurtosis:</strong> a measure of the signal distribution's tail behavior</li>
+            </ul>
+          </article>
+          <article class="importance-card">
+            <p class="importance-location">MIC7 + MIC10 · NORMALIZED LIFT IMPROVEMENT (R)</p>
+            <h3>Information across microphones</h3>
+            <p>Important spectral-energy features came from both Mic7 and Mic10 when predicting normalized lift improvement. Other microphones also contributed.</p>
+            <p>The reported findings highlight contributions from multiple microphone locations.</p>
+          </article>
+        </div>
+        <aside class="importance-explanation" aria-label="How to interpret feature importance">
+          <h3>What does permutation importance mean?</h3>
+          <p>Shuffling a feature's values reveals how much the model relies on it for accurate predictions. A larger drop in accuracy on held-out data indicates greater reliance on that feature.</p>
+          <p><strong>Importance indicates predictive association, not causation.</strong> An informative microphone feature does not establish that it causes a change in lift.</p>
+          <p class="lab-info">Qualitative findings from the submitted CSCI 5415 research paper. No numerical importance scores are shown.</p>
+        </aside>
+        </div>
+      </section>
+</main>

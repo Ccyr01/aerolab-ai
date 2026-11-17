@@ -35,3 +35,10 @@ Thumbs.db
 
 # Generated experiment results
 results/
+
+# Local PowerShell cache and unused research feature matrix
+Microsoft/
+data/research/features.csv
+.azure/
+.aws/
+.docker/

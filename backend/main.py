@@ -12,12 +12,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal
 from experiment_runner import run_experiment
+from backend.research.router import router as research_router
 
 app = FastAPI(
     title="AeroLab AI API",
     description="Machine learning predictions for airfoil noise.",
     version="1.0.0",
 )
+
+app.include_router(research_router)
 
 training_lock = threading.Lock()
 
@@ -28,7 +31,10 @@ app.add_middleware(
         "http://127.0.0.1:4200",
         *[
             origin.strip().rstrip("/")
-            for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+            for origin in os.getenv(
+                "FRONTEND_ORIGINS",
+                "https://happy-ocean-045bd8f1e.6.azurestaticapps.net",
+            ).split(",")
             if origin.strip()
         ],
     ],
@@ -260,6 +266,12 @@ def get_model_comparison():
 # --------------------------------------------------
 @app.post("/experiments/train")
 def train_experiment(data: ExperimentInput):
+    if os.getenv("ENABLE_TRAINING", "true").strip().lower() not in {"true", "1", "yes"}:
+        raise HTTPException(
+            status_code=403,
+            detail="Training experiments are disabled in this environment.",
+        )
+
     validate_experiment_parameters(
         data.algorithm,
         data.parameters,
