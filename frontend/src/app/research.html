@@ -118,38 +118,14 @@
               <canvas #researchChart role="img" aria-label="Scatter plot of DBD forcing frequency in Hz against change in lift coefficient, ΔCL (dimensionless)"></canvas>
             </div>
           }
-          <div class="step-chart-grid">
-          <section class="step-chart-card" aria-labelledby="lift-step-title">
-          <div class="lab-heading">
-            <h3 id="lift-step-title">Lift Response by Experimental Step</h3>
-          </div>
           @if (!selectedResearchRun) {
-            <p class="lab-info">Select a specific experimental run to view its lift response by step.</p>
+            <p class="lab-info">Select a specific experimental run to view its lift and forcing-frequency timeline.</p>
           } @else if (!researchLoading() && !researchError() && researchObservations().length > 0) {
-            <p class="lab-info">{{ selectedResearchRun }}: {{ researchObservations().length }} observations ordered by experimental step.</p>
-            <div class="research-chart-container">
-              <canvas #researchStepChart role="img"
-                [attr.aria-label]="'Change in lift coefficient, ΔCL (dimensionless), by experimental step (0–20) for run ' + selectedResearchRun"></canvas>
-            </div>
+            <app-run-timeline [rows]="researchObservations()" [run]="selectedResearchRun" />
           }
-          </section>
-          <section class="step-chart-card" aria-labelledby="forcing-step-title">
-          <div class="lab-heading">
-            <h3 id="forcing-step-title">Forcing Frequency by Experimental Step</h3>
-          </div>
-          @if (!selectedResearchRun) {
-            <p class="lab-info">Select a specific experimental run to view its forcing frequency by step.</p>
-          } @else if (!researchLoading() && !researchError() && researchObservations().length > 0) {
-            <p class="lab-info">{{ selectedResearchRun }}: {{ researchObservations().length }} observations ordered by experimental step.</p>
-            <div class="research-chart-container">
-              <canvas #researchActionChart role="img"
-                [attr.aria-label]="'DBD forcing frequency in Hz by experimental step (0–20) for run ' + selectedResearchRun"></canvas>
-            </div>
-          }
-          </section>
-          </div>
         </div>
       </section>
+      <app-acoustic-feature-explorer />
       <section class="research-section feature-importance" aria-labelledby="importance-title">
         <div class="importance-header">
           <div class="lab-heading">
